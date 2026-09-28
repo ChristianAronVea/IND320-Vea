@@ -16,4 +16,5 @@ Easy setup and connection. At first I tried to use the data file from the book h
 I was, and still am, uncertain if the assignment wants me to plot all columns together on page 3 (plot). The numerical and non-numerical
 that is.
 
-I set up the link to streamlit, only to realise I had to do a merge request to main before it would work.
+I set up the link to streamlit, only to realise I had to do a merge request to main before it would work. The request went smoothly. And the app
+works on the public streamlit link.
