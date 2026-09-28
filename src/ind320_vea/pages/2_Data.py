@@ -33,6 +33,9 @@ df = load_data()
 # Convert the date column to datetime
 df["date_Id"] = pd.to_datetime(df["date_Id"])
 
+# Sort the data chronologically before creating the table
+df = df.sort_values("date_Id").reset_index(drop=True)
+
 # Find the first month in the dataset
 first_month = df["date_Id"].min().to_period("M")
 
