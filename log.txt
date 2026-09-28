@@ -1,0 +1,18 @@
+Assignment 1
+
+I will begin with saying this log was written many at the end of me doing this assignment. My unpationed soul that used wanted get going with the fun stuff
+didnt take the time to write along the process. So I may leave put some imporant of this log, but now you know. 
+
+When I first started with this assignment I was happy I had set up all the different components required. The uv, the book, github account, streamlit account 
+and so on. There was no problems with eigther of them.
+
+NOTEBOOK
+While doing the steps in the assignment, I tried to understand the data as much as possible. I quicly understood some columns are numerical values, like
+capacity_TWh and fill_rate, and some are more categorical; area_type, area_number. This was important when making logical plots. Me and AI was batteling
+to make the plots.
+
+STREAMLIT APP
+Easy set up and connection. At first I tried to use the data file from the book here as well. Only to read the last line and realise what to do.
+I was, and still am, unsurtend if the assignment wants me to plot all coulms together on page 3 (plot). The numerical and non-numerical
+that is. 
+
