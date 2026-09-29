@@ -1,18 +1,28 @@
 Assignment 1
 
-I will begin with saying this log was written many at the end of me doing this assignment. My unpationed soul that used wanted get going with the fun stuff
-didnt take the time to write along the process. So I may leave put some imporant of this log, but now you know. 
+I will begin with saying this log was written mainly at the end of me doing this assignment. My 
+impatient soul that just wanted to get going with the fun stuff didn't take the time to write 
+along the process. So I may leave out some important parts of this log, but now you know.
 
-When I first started with this assignment I was happy I had set up all the different components required. The uv, the book, github account, streamlit account 
-and so on. There was no problems with eigther of them.
+When I first started with this assignment, I was happy I had set up all the necessary things: 
+the uv, the book, github account, streamlit account and so on. There were no problems with either 
+of them.
 
 NOTEBOOK
-While doing the steps in the assignment, I tried to understand the data as much as possible. I quicly understood some columns are numerical values, like
-capacity_TWh and fill_rate, and some are more categorical; area_type, area_number. This was important when making logical plots. Me and AI was batteling
-to make the plots.
+I am familiar with Jupiter Notebook, so it was no hasle geting started. While doing the steps in 
+the assignment, I tried to understand the data as much as possible. There are multiple observations
+on each day. There is no time stamp on the data, so it looks like its all taken at the same point
+in time. But I reacon there is a time difference in hours that is not captured here. I also 
+understood that some columns are numerical values, like "capacity_TWh" and "fill_rate", and some '
+are categorical: "area_type", "area_number". This was important to keep in mind while making 
+logical plots. Me and AI were battling together to make the plots.
 
 STREAMLIT APP
-Easy set up and connection. At first I tried to use the data file from the book here as well. Only to read the last line and realise what to do.
-I was, and still am, unsurtend if the assignment wants me to plot all coulms together on page 3 (plot). The numerical and non-numerical
-that is. 
+Easy setup and connection. At first I tried to use the data file from the book here as well. Only 
+to read the last line and realise what to do. I was, and still am, uncertain if the assignment 
+wants me to plot all columns together on page 3 (plot). The numerical and non-numerical that is.
 
+I was setting up the link to streamlit, only to realise I had to do a merge request to main before 
+it would work. The merge request went smoothly. And the app works on the public streamlit link.
+
+STREAMING
