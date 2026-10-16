@@ -10,7 +10,7 @@ as well. The areas ask for in the assignment can be found in the notebook.
 After that I registred on the Transparency Platform to get a security token. This I should have done
 earlier was the first ting that came to mind after sending the email (3 days is long on a friday).
 
-When it came to the removing of the CSV-file and adding the API, I was confused about what to do with 
+When it came removing the CSV-file and adding the API, I was confused about what to do with 
 the notebook. Because I hade already made a new one (Part2), but now was I supposed to remove the
 CSV-file and implement the API. So I just left the Part1.ipynb notebook and CSV-file in the repo, 
 but used tih API in Part2.ipynb.

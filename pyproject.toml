@@ -13,7 +13,9 @@ dependencies = [
     "pandas>=2.3.3",
     "pyjstat>=2.4.0",
     "pymongo>=4.18.3",
+    "pyspark==3.5.1",
     "python-dotenv>=1.2.4",
+    "setuptools>=84.0.0",
     "streamlit>=1.64.0",
 ]
 
