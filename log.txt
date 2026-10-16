@@ -1,3 +1,32 @@
+Assignment 2
+Before I started on assignment 2, I handled the tips on assignment 1, which was to: 
+"separating the different reservoir areas in the time-series plots for clearer comparisons". So
+I did just that.
+
+I registred my MongoDB account and tested it in Part2.ipynb. The Spark-Cassandra connection is 
+also tested there. After that I started exploring the APIs. Both in the notebook and on the website
+as well. The areas ask for in the assignment can be found in the notebook. 
+
+After that I registred on the Transparency Platform to get a security token. This I should have done
+earlier was the first ting that came to mind after sending the email (3 days is long on a friday).
+
+When it came to the removing of the CSV-file and adding the API, I was confused about what to do with 
+the notebook. Because I hade already made a new one (Part2), but now was I supposed to remove the
+CSV-file and implement the API. So I just left the Part1.ipynb notebook and CSV-file in the repo, 
+but used tih API in Part2.ipynb.
+
+All plots worked good, except the last one. I think it's because of the Capasity_TWh has zero as
+standard deviation. But when using data from the API, its not zero, but very, very small instead.
+So I skiped normalization on capacity_TWh, and added it to the plot at the end.
+
+
+
+
+----------------------------------------------------------------------------------------------------
+
+
+
+
 Assignment 1
 
 I will begin with saying this log was written mainly at the end of me doing this assignment. My 
