@@ -5,7 +5,7 @@ from ind320_vea.help_functions import load_data
 
 st.title("Reservoir Data")
 
-df = load_data()
+df = load_data("1995-01", "1995-02")  # Load the data for the first month in the dataset
 
 # Convert the date column to datetime
 df["date_Id"] = pd.to_datetime(df["date_Id"])
@@ -13,13 +13,9 @@ df["date_Id"] = pd.to_datetime(df["date_Id"])
 # Sort the data chronologically before creating the table
 df = df.sort_values("date_Id").reset_index(drop=True)
 
-# Find the first month in the dataset
-first_month = df["date_Id"].min().to_period("M")
-
 # Select all observations from the first month
-first_month_df = df[
-    df["date_Id"].dt.to_period("M") == first_month
-]
+first_month = df["date_Id"].min().strftime("%Y-%m")
+first_month_df = df[df["date_Id"].dt.strftime("%Y-%m") == first_month]
 
 
 

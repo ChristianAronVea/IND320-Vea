@@ -7,7 +7,7 @@ st.title("Plot")
 
 # first month in the dataset
 months = pd.period_range(
-    start="1995-09",
+    start="1995-01",
     end=pd.Timestamp.today().to_period("M"),
     freq="M",
 )
@@ -27,7 +27,7 @@ end_date = selected_month[1].end_time
 df = load_data(start_date, end_date)        # Load the data for the selected month range
 
 
-# SELECT RESERVOIR AREA
+# SELECT RESERVOIR AREA - RADIO BUTTONS
 # Let the user choose which reservoir area to plot
 area_options = sorted(
     df[["area_type", "area_number"]]
