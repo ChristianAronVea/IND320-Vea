@@ -22,6 +22,15 @@ So I skiped normalization on capacity_TWh, and added it to the plot at the end.
 
 
 
+Retrived data, also in-land, so had to exclude them afterwards.
+
+In the sending to Cassandra it was important to make Primary key: PRIMARY KEY ((from_area, to_area, year), ts),
+to avoid overwriting.
+
+I had an error regarding Python-worker when trying to send data to Cassandra using Spark. Therefore
+I desided to work around that error by reading a CSV-file to Cassandra. 
+
+
 ----------------------------------------------------------------------------------------------------
 
 
