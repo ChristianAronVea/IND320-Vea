@@ -3,19 +3,18 @@ import requests
 import streamlit as st
 
 
-API_NVE = (
-    "https://biapi.nve.no/magasinstatistikk/api/"
-    "Magasinstatistikk/HentOffentligData"
-)
+API_NVE = ("https://biapi.nve.no/magasinstatistikk/api/Magasinstatistikk/HentOffentligData")
 
 
 @st.cache_data
-def load_data() -> pd.DataFrame:
+def load_data(start_date=None, end_date=None):
     response = requests.get(API_NVE, timeout=30)
     response.raise_for_status()
 
     df = pd.DataFrame(response.json())
-    return df.rename(
+
+    # Convert the names from norwegian to english
+    df = df.rename(
         columns={
             "dato_Id": "date_Id",
             "omrType": "area_type",
@@ -30,3 +29,12 @@ def load_data() -> pd.DataFrame:
             "endring_fyllingsgrad": "fill_rate_change",
         }
     )
+
+    df["date_Id"] = pd.to_datetime(df["date_Id"])
+
+    if start_date is not None:
+        df = df[df["date_Id"] >= pd.Timestamp(start_date)]
+    if end_date is not None:
+        df = df[df["date_Id"] <= pd.Timestamp(end_date)]
+
+    return df.copy()
