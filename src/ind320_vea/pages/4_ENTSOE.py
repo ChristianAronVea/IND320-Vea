@@ -110,3 +110,26 @@ with col2:
         ax.legend()
         fig.autofmt_xdate()
         st.pyplot(fig)
+
+
+
+
+
+with st.expander("Data source"):
+    st.write(
+        """
+        The data shown on this page comes from ENTSO-E cross-border
+        electricity flow data. The data has been aggregated by hour and
+        stored in the MongoDB.
+
+        The data contains:
+        - electricity flow connections
+        - direction (in/out)
+        - timestamp
+        - year
+        - month
+        - energy in MWh. 
+        
+        The direction `in` represents electricity flowing into Norway, while `out` represents electricity flowing out of Norway.
+        """
+    )
