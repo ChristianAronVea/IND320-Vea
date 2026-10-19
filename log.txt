@@ -19,18 +19,20 @@ All plots worked good, except the last one. I think it's because of the Capasity
 standard deviation. But when using data from the API, its not zero, but very, very small instead.
 So I skiped normalization on capacity_TWh, and added it to the plot at the end.
 
-
-
-
-Retrived data, also in-land, so had to exclude them afterwards.
+Establishing connections to Cassandra and MongoDB via Spark was no easy going. Many hours of 
+testing, errors and failing was all that mattered. I wasnt able to do the Spark-Cassandra 
+connection due to some "Python-worker" didn't work for me. So I used a work around be 
+reading a CSV-file to Cassandra. 
 
 In the sending to Cassandra it was important to make Primary key: PRIMARY KEY ((from_area, to_area, year), ts),
-to avoid overwriting.
+to avoid overwriting. Also to 
 
-I had an error regarding Python-worker when trying to send data to Cassandra using Spark. Therefore
-I desided to work around that error by reading a CSV-file to Cassandra. 
+After making pie chart and line plot, I realised the hade to be converted to mwh before submitting to MongoDB.
+I hade seen that the data didn't all have same resoluton (some been capured every 15 min, others
+every hour), but I didn't think it mattered. It did matter.
 
-Realised I hade to convert the mw data to mwh before submitting to MongoDB.
+The page on the app is looking ok I think. The columns make the plots to small for my taste, but
+it was required, so what to do.
 
 ----------------------------------------------------------------------------------------------------
 
