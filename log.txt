@@ -30,6 +30,7 @@ to avoid overwriting.
 I had an error regarding Python-worker when trying to send data to Cassandra using Spark. Therefore
 I desided to work around that error by reading a CSV-file to Cassandra. 
 
+Realised I hade to convert the mw data to mwh before submitting to MongoDB.
 
 ----------------------------------------------------------------------------------------------------
 
