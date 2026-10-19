@@ -27,17 +27,20 @@ end_date = selected_month[1].end_time
 df = load_data(start_date, end_date)        # Load the data for the selected month range
 
 
+# SELECT RESERVOIR AREA
 # Let the user choose which reservoir area to plot
 area_options = sorted(
     df[["area_type", "area_number"]]
     .drop_duplicates()
     .itertuples(index=False, name=None)
 )
-selected_area = st.selectbox(
+selected_area = st.radio(
     "Select reservoir area",
     area_options,
     format_func=lambda area: f"{area[0]} - area {area[1]}",
 )
+
+
 
 # SELECT BOX
 # Only numeric measurements can be plotted against the date axis.
