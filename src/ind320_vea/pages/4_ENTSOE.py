@@ -12,6 +12,7 @@ df = load_crossborder_data()
 
 col1, col2 = st.columns(2)
 
+# Pie Chart - Total MWh for the selected connection
 with col1:
     # YEAR - RADIO BUTTONS
     years = sorted(df["year"].unique())
@@ -50,3 +51,62 @@ with col1:
     )
     fig.tight_layout()
     st.pyplot(fig)
+
+
+# Line Plot - MWh over time for the selected connection
+with col2:
+    months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+
+    with st.expander("Choose months", expanded=True):
+        selected_months = st.pills(
+            "Months",
+            months,
+            selection_mode="multi",
+            width="stretch",
+        )
+
+    # Calculat months numbers from the selected months
+    if selected_months:
+        selected_month_numbers = [
+            months.index(month) + 1
+            for month in selected_months
+        ]
+    else:
+        selected_month_numbers = []
+        st.info("Choose at least one month.")
+
+    # Define plot data
+    plot_data = connection_df[
+        connection_df["month"].isin(selected_month_numbers)
+    ].sort_values("ts")
+
+    if not plot_data.empty:
+        fig, ax = plt.subplots()
+        for direction in ["in", "out"]:
+            direction_data = plot_data[
+                plot_data["direction"] == direction
+            ]
+            ax.plot(
+                direction_data["ts"],
+                direction_data["mwh"],
+                label=f"{direction} to/from Norway",
+            )
+        ax.set_xlabel("Date")
+        ax.set_ylabel("MWh")
+        ax.set_title("MWh over Time - One Connection")
+        ax.legend()
+        fig.autofmt_xdate()
+        st.pyplot(fig)
