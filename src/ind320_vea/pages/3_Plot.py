@@ -5,22 +5,27 @@ from ind320_vea.help_functions import load_data
 
 st.title("Plot")
 
-df = load_data()
+# first month in the dataset
+months = pd.period_range(
+    start="1995-09",
+    end=pd.Timestamp.today().to_period("M"),
+    freq="M",
+)
 
-# Convert the date column to datetime
-df["date_Id"] = pd.to_datetime(df["date_Id"])
 
-# Keep the months as pandas Period values so they remain sortable and filterable.
-month_values = df["date_Id"].dt.to_period("M")
-months = sorted(month_values.dropna().unique())
-
-# SLIDER
+# SLIDER - choose a month range to load and plot
 selected_month = st.select_slider(
     "Select month",
     options=months,
     value=(months[0], months[1]),
     format_func=str,
 )
+
+start_date = selected_month[0].start_time
+end_date = selected_month[1].end_time
+
+df = load_data(start_date, end_date)        # Load the data for the selected month range
+
 
 # Let the user choose which reservoir area to plot
 area_options = sorted(
@@ -57,9 +62,7 @@ st.write("Selected:", selected_column)
 
 # Filter the data to the selected month range
 month_data = df[
-    (month_values >= selected_month[0])
-    & (month_values <= selected_month[1])
-    & (df["area_type"] == selected_area[0])
+    (df["area_type"] == selected_area[0])
     & (df["area_number"] == selected_area[1])
 ]
 
