@@ -1,43 +1,19 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 import pandas as pd
+
+from ind320_vea.help_functions import load_data
 
 st.title("Plot")
 
-
-@st.cache_data
-def load_data():
-    # Read the reservoir data from the local CSV file
-    df = pd.read_csv("data/reservoirs.csv")
-
-    # Rename columns to understandable English names
-    df = df.rename(columns={
-        "dato_Id": "date_Id",
-        "omrType": "area_type",
-        "omrnr": "area_number",
-        "iso_aar": "iso_year",
-        "iso_uke": "iso_week",
-        "fyllingsgrad": "fill_rate",
-        "kapasitet_TWh": "capacity_TWh",
-        "fylling_TWh": "storage_TWh",
-        "neste_Publiseringsdato": "next_publication_date",
-        "fyllingsgrad_forrige_uke": "fill_rate_previous_week",
-        "endring_fyllingsgrad": "fill_rate_change"
-    })
-
-    return df
+# first month in the dataset
+months = pd.period_range(
+    start="1995-01",
+    end=pd.Timestamp.today().to_period("M"),
+    freq="M",
+)
 
 
-df = load_data()
-
-# Convert the date column to datetime
-df["date_Id"] = pd.to_datetime(df["date_Id"])
-
-# Keep the months as pandas Period values so they remain sortable and filterable.
-month_values = df["date_Id"].dt.to_period("M")
-months = sorted(month_values.dropna().unique())
-
-# SLIDER
+# SLIDER - choose a month range to load and plot
 selected_month = st.select_slider(
     "Select month",
     options=months,
@@ -45,17 +21,26 @@ selected_month = st.select_slider(
     format_func=str,
 )
 
+start_date = selected_month[0].start_time
+end_date = selected_month[1].end_time
+
+df = load_data(start_date, end_date)        # Load the data for the selected month range
+
+
+# SELECT RESERVOIR AREA - RADIO BUTTONS
 # Let the user choose which reservoir area to plot
 area_options = sorted(
     df[["area_type", "area_number"]]
     .drop_duplicates()
     .itertuples(index=False, name=None)
 )
-selected_area = st.selectbox(
+selected_area = st.radio(
     "Select reservoir area",
     area_options,
     format_func=lambda area: f"{area[0]} - area {area[1]}",
 )
+
+
 
 # SELECT BOX
 # Only numeric measurements can be plotted against the date axis.
@@ -80,9 +65,7 @@ st.write("Selected:", selected_column)
 
 # Filter the data to the selected month range
 month_data = df[
-    (month_values >= selected_month[0])
-    & (month_values <= selected_month[1])
-    & (df["area_type"] == selected_area[0])
+    (df["area_type"] == selected_area[0])
     & (df["area_number"] == selected_area[1])
 ]
 
