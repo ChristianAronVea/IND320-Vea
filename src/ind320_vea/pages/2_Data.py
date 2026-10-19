@@ -1,33 +1,10 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
+
+from ind320_vea.help_functions import load_data
 
 st.title("Reservoir Data")
 
-
-@st.cache_data
-def load_data():
-    # Read the reservoir data from the local CSV file
-    df = pd.read_csv("data/reservoirs.csv")
-
-    # Rename columns to understandable English names
-    df = df.rename(columns={
-        "dato_Id": "date_Id",
-        "omrType": "area_type",
-        "omrnr": "area_number",
-        "iso_aar": "iso_year",
-        "iso_uke": "iso_week",
-        "fyllingsgrad": "fill_rate",
-        "kapasitet_TWh": "capacity_TWh",
-        "fylling_TWh": "storage_TWh",
-        "neste_Publiseringsdato": "next_publication_date",
-        "fyllingsgrad_forrige_uke": "fill_rate_previous_week",
-        "endring_fyllingsgrad": "fill_rate_change"
-    })
-
-    return df
-
-
-# Load the data
 df = load_data()
 
 # Convert the date column to datetime
