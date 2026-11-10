@@ -60,8 +60,5 @@ st.sidebar.selectbox(
     format_func=vis_omraade,
     key="selected_area",
 )
-st.sidebar.caption(
-    "VASS areas use the matching precipitation regions. NO 0 uses all five."
-)
 
 page.run()

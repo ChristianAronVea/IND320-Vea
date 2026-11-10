@@ -7,40 +7,24 @@ from scipy.signal import spectrogram
 from sklearn.neighbors import LocalOutlierFactor
 from statsmodels.tsa.seasonal import STL
 
-
+# get the hourly series of a variable from the weather data
 def get_hourly_series(weather_data, variable):
     data = weather_data[["time", variable]].copy()
     data["time"] = pd.to_datetime(data["time"], utc=True)
     data[variable] = pd.to_numeric(data[variable], errors="raise")
-    if data.isna().any().any():
-        raise ValueError("Weather data must not contain missing values.")
-
     series = data.groupby("time")[variable].mean().sort_index()
-    if len(series) < 3:
-        raise ValueError("At least 3 hourly observations are required.")
-    if not np.isfinite(series.to_numpy()).all():
-        raise ValueError("Weather data must contain finite values.")
-    if not (series.index.to_series().diff().dropna() == pd.Timedelta(hours=1)).all():
-        raise ValueError("Weather data must have one observation per hour.")
+    
     return series.astype(float)
 
-
+# High-pass filter using Discrete Cosine Transform (DCT)
 def high_pass_dct(values, cutoff_period_days=30):
-    if cutoff_period_days <= 0:
-        raise ValueError("cutoff_period_days must be greater than zero.")
-
     coefficients = dct(values, type=2, norm="ortho")
     low_frequency_count = int(np.ceil(2 * len(values) / (cutoff_period_days * 24)))
     coefficients[:max(1, low_frequency_count)] = 0
     return idct(coefficients, type=2, norm="ortho")
 
-
-def plot_precipitation_outliers(
-    weather_data, cutoff_period_days=30, n_std=3, display_daily=True
-):
-    if n_std <= 0:
-        raise ValueError("n_std must be greater than zero.")
-
+# Plot precipitation outliers using DCT-based high-pass filtering and SPC limits
+def plot_precipitation_outliers(weather_data, cutoff_period_days=30, n_std=3, display_daily=True):
     precipitation = get_hourly_series(weather_data, "precipitation")
     satv = high_pass_dct(precipitation.to_numpy(), cutoff_period_days)
     center = np.median(satv)
@@ -112,11 +96,8 @@ def plot_precipitation_outliers(
     })
     return fig, outliers
 
-
+# Plot temperature anomalies using Local Outlier Factor (LOF)
 def plot_temperature_lof(weather_data, proportion_outliers=0.01):
-    if not 0 < proportion_outliers < 0.5:
-        raise ValueError("proportion_outliers must be between 0 and 0.5.")
-
     temperature = get_hourly_series(weather_data, "temperature_2m")
     lof = LocalOutlierFactor(
         n_neighbors=min(20, len(temperature) - 1),
@@ -154,13 +135,9 @@ def plot_temperature_lof(weather_data, proportion_outliers=0.01):
     })
     return fig, outliers
 
-
+# STL decomposition of reservoir fill rate
 def plot_stl_decomposition(fill_rate, seasonal=13, trend=53, robust=True):
     series = fill_rate.dropna().astype(float).sort_index()
-    if len(series) < 2 * 52:
-        raise ValueError("At least two years of weekly fill-rate data are required.")
-    if series.index.has_duplicates:
-        raise ValueError("fill_rate contains duplicate dates.")
 
     result = STL(
         series,
@@ -197,12 +174,9 @@ def plot_stl_decomposition(fill_rate, seasonal=13, trend=53, robust=True):
     return fig
 
 
+# Spectrogram of reservoir fill rate
 def plot_fill_rate_spectrogram(fill_rate, window_length=52, window_overlap=26):
     series = fill_rate.dropna().astype(float).sort_index()
-    if window_length < 2 or window_length > len(series):
-        raise ValueError("window_length must be between 2 and the series length.")
-    if window_overlap < 0 or window_overlap >= window_length:
-        raise ValueError("window_overlap must be non-negative and less than window_length.")
 
     frequencies, times, power = spectrogram(
         series.to_numpy(),

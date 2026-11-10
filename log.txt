@@ -1,3 +1,37 @@
+Assignment 3
+
+This assignment was a battle with the APIs. It started right away with the weather data. First I used the 
+wrong one (forecast data). Then I found the historical weather data, but after a while I realised it only 
+covered the last 16 days. Then I found the historical archive, which goes back to 2007. But this one didn’t 
+work either, unlike the previous ones. After hours of testing and asking AI, I understood that the maximum 
+daily credit limit had been used.
+
+Moving on, the functions for handling weather data were easier to deal with. I made some test data so that 
+I was not dependent on the actual data from Open-Meteo, and this worked great.
+
+After defining the functions, I found that hourly resolution was not great for the plots, so I changed it 
+to daily averages. However, the outliers and anomalies are still detected on the hourly data, so only the 
+plots look different.
+
+The app has many changes, as expected. The biggest is the new pages. I have reservoir and weather on 
+separate pages, and each of them has two pages: one where the data is loaded, and another where the 
+data is analysed. The analysis includes parameters to interact with and change, and some plots to visualise 
+them.
+
+I added a global area selector on the left, under the page menu. The names have been changed from the 
+previous assignment to make more sense and be more compact.
+
+It was also necessary to reorder the pages and rename some of them.
+
+There was a lot of implementation this round, and many places to mess up. From testing, it works as I would 
+expect, and I have had to edit the code and logic more than once. Hopefully, it’s good now.
+
+
+
+----------------------------------------------------------------------------------------------------
+
+
+
 Assignment 2
 Before I started on assignment 2, I handled the tips on assignment 1, which was to: 
 "separating the different reservoir areas in the time-series plots for clearer comparisons". So
@@ -34,8 +68,9 @@ every hour), but I didn't think it mattered. It did matter.
 The page on the app is looking ok I think. The columns make the plots to small for my taste, but
 it was required, so what to do.
 
-----------------------------------------------------------------------------------------------------
 
+
+----------------------------------------------------------------------------------------------------
 
 
 

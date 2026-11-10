@@ -18,10 +18,7 @@ weather_data = (
     else None
 )
 
-st.caption(
-    f"Weather data for {selected_area[0]} - area {selected_area[1]}, "
-    f"{start_date} to {end_date}"
-)
+st.caption(f"Weather data for interval: {start_date} to {end_date}")
 
 precipitation_tab, temperature_tab = st.tabs(
     ["Outlier / SPC", "Anomaly / LOF"]
