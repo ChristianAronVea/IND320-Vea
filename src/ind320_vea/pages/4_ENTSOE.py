@@ -67,7 +67,7 @@ with col1:
         height=520,
         margin=dict(l=0, r=0, t=100, b=40),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 # Line Plot - MWh over time for the selected connection
@@ -154,7 +154,7 @@ with col2:
             height=600,
             margin=dict(t=140),
         )
-        st.plotly_chart(line_fig, use_container_width=True)
+        st.plotly_chart(line_fig, width="stretch")
 
 
 
