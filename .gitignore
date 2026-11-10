@@ -15,7 +15,7 @@ wheels/
 data/
 .cache.sqlite
 *.html
-.pdf
+*.pdf
 
 # Region shapefiles required by the Streamlit weather-data page
 !Notebooks/data/
