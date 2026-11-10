@@ -13,3 +13,6 @@ wheels/
 
 # data
 data/
+.cache.sqlite
+*.html
+.pdf
