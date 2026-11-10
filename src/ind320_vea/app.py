@@ -1,6 +1,16 @@
+# app.py
 import streamlit as st
+from pathlib import Path
 
-st.title("Reservoir Data")
+pages_folder = Path(__file__).parent / "pages"
 
-st.write("Welcome to the landing page of my project in IND320!")
-st.write("You are more than welcome to explore other pages as well.")
+pages = [
+    st.Page(pages_folder / "1_Home.py", title="Home"),
+    st.Page(pages_folder / "2_Data.py", title="Data"),
+    st.Page(pages_folder / "3_Plot.py", title="Plot"),
+    st.Page(pages_folder / "4_ENTSOE.py", title="ENTSOE"),
+    st.Page(pages_folder / "5_About.py", title="About"),
+]
+
+page = st.navigation(pages)
+page.run()
