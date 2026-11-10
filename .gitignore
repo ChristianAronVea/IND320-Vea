@@ -13,3 +13,4 @@ wheels/
 
 # data
 data/
+.cache.sqlite
