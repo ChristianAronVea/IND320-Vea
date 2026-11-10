@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 
 from ind320_vea.help_functions import load_data
 
-st.title("Plot")
+st.title("Reservoir data")
 
 # first month in the dataset
 months = pd.period_range(

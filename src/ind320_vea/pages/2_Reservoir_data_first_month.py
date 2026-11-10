@@ -5,7 +5,7 @@ from plotly.subplots import make_subplots
 
 from ind320_vea.help_functions import load_data
 
-st.title("Reservoir Data")
+st.title("Reservoir Data First Month")
 
 df = load_data("1995-01", "1995-02")  # Load the data for the first month in the dataset
 

@@ -30,10 +30,7 @@ precipitation_tab, temperature_tab = st.tabs(
 with precipitation_tab:
     st.subheader("Precipitation outliers")
     if weather_data is None:
-        st.info(
-            "Load the weather data on the Weather data page first. "
-            "It is available only in the current session."
-        )
+        st.info("Load the weather data on the Weather data page first.")
     else:
         cutoff_period_days = st.slider(
             "DCT cutoff period (days)",
@@ -63,10 +60,7 @@ with precipitation_tab:
 with temperature_tab:
     st.subheader("Temperature anomalies")
     if weather_data is None:
-        st.info(
-            "Load the weather data on the Weather data page first. "
-            "It is available only in the current session."
-        )
+        st.info("Load the weather data on the Weather data page first.")
     else:
         proportion_outliers = st.slider(
             "Proportion of outliers",

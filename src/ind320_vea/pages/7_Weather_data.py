@@ -1,5 +1,4 @@
 from datetime import date
-
 import streamlit as st
 
 from ind320_vea.weather_functions import (
@@ -60,7 +59,7 @@ else:
 
 # Display weather data information.
 if weather_data is None and valid_range:
-    st.info("Weather data for this area and period is not available in this session.")
+    st.info("Weather data for this area and period has not been loaded.")
 
     if st.button("Load weather data", type="primary"):
         progress = st.progress(0, text="Preparing the download...")
