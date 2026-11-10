@@ -16,3 +16,10 @@ data/
 .cache.sqlite
 *.html
 .pdf
+
+# Region shapefiles required by the Streamlit weather-data page
+!Notebooks/data/
+!Notebooks/data/Budområder/
+!Notebooks/data/Budområder/Budområder.*
+!Notebooks/data/NVE_Region/
+!Notebooks/data/NVE_Region/NVE_Region.*
