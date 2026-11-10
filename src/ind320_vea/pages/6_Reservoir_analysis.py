@@ -17,7 +17,7 @@ area_data = data[
 ]
 fill_rate = area_data.set_index("date_Id")["fill_rate"].sort_index()
 
-st.caption(f"Magasinstatistikk for {selected_area[0]} - area {selected_area[1]}")
+st.caption(f"Reservoir fill rate for {selected_area[0]} {selected_area[1]}")
 
 stl_tab, spectrogram_tab = st.tabs(["STL", "Spectrogram"])
 
