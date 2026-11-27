@@ -34,7 +34,7 @@ MEASURES = {
 }
 
 
-@st.cache_data
+@st.cache_data(show_spinner="Loading map boundaries...")
 def load_area_geojson(path: str):
     # Convert the polygons to latitude and longitude for the map.
     areas = gpd.read_file(path, encoding="utf-8")
@@ -115,6 +115,53 @@ for feature in geojson["features"]:
     properties["map_id"] = map_id
 
 if map_values:
+    # Cover the map while rebuilding it after an area or date selection.
+    loading_overlay = st.empty()
+    with loading_overlay.container():
+        st.html(
+            """
+            <style>
+                @keyframes map-spinner {
+                    to { transform: rotate(360deg); }
+                }
+                #map-loading-overlay {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 1000000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(20, 30, 40, 0.22);
+                }
+                #map-loading-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 14px 18px;
+                    border-radius: 8px;
+                    background: white;
+                    color: #222;
+                    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+                    font: 16px sans-serif;
+                }
+                #map-loading-spinner {
+                    width: 26px;
+                    height: 26px;
+                    border: 3px solid #d7dce1;
+                    border-top-color: #1b7390;
+                    border-radius: 50%;
+                    animation: map-spinner 0.8s linear infinite;
+                }
+            </style>
+            <div id="map-loading-overlay" role="status" aria-live="polite">
+                <div id="map-loading-card">
+                    <div id="map-loading-spinner"></div>
+                    <span>Updating map...</span>
+                </div>
+            </div>
+            """
+        )
+
     map_data = pd.DataFrame(map_values)
     low, high = map_data["value"].min(), map_data["value"].max()
     if low == high:
@@ -179,6 +226,7 @@ if map_values:
         selection_mode="points",
         width="stretch",
     )
+    loading_overlay.empty()
 else:
     st.warning("No reservoir measurements are available for this date.")
 

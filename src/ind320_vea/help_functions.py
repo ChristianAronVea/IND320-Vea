@@ -10,8 +10,12 @@ from pymongo import MongoClient
 API_NVE = ("https://biapi.nve.no/magasinstatistikk/api/Magasinstatistikk/HentOffentligData")
 
 
-@st.cache_data
-def load_data(start_date=None, end_date=None):
+@st.cache_data(
+    ttl=86400,
+    show_spinner="Loading reservoir data from NVE...",
+)
+def _load_reservoir_data():
+    # Cache the full response so each date filter reuses the same download.
     response = requests.get(API_NVE, timeout=30)
     response.raise_for_status()
 
@@ -35,7 +39,11 @@ def load_data(start_date=None, end_date=None):
     )
 
     df["date_Id"] = pd.to_datetime(df["date_Id"])
+    return df
 
+
+def load_data(start_date=None, end_date=None):
+    df = _load_reservoir_data()
     if start_date is not None:
         df = df[df["date_Id"] >= pd.Timestamp(start_date)]
     if end_date is not None:
@@ -63,7 +71,10 @@ def get_mongo_client() -> MongoClient:
     return MongoClient(uri)
 
 
-@st.cache_data
+@st.cache_data(
+    ttl=86400,
+    show_spinner="Loading ENTSO-E flow data...",
+)
 def load_crossborder_data() -> pd.DataFrame:
     client = get_mongo_client()
     collection = client["entsoe"]["crossborder_flows"]

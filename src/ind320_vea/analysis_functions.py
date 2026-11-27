@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import streamlit as st
 from plotly.subplots import make_subplots
 from river import time_series
 from scipy.fft import dct, idct
@@ -12,6 +13,7 @@ from statsmodels.tsa.seasonal import STL
 colors = ["#1b7390", "#cf771f", "#2aaa2a", "#ffff03", "#FF2CDC"]
 
 # get the hourly series of a variable from the weather data
+@st.cache_data(max_entries=32, show_spinner=False)
 def get_hourly_series(weather_data, variable):
     data = weather_data[["time", variable]].copy()
     data["time"] = pd.to_datetime(data["time"], utc=True)
@@ -21,6 +23,7 @@ def get_hourly_series(weather_data, variable):
     return series.astype(float)
 
 # High-pass filter using Discrete Cosine Transform (DCT)
+@st.cache_data(max_entries=32, show_spinner=False)
 def high_pass_dct(values, cutoff_period_days=30):
     coefficients = dct(values, type=2, norm="ortho")
     low_frequency_count = int(np.ceil(2 * len(values) / (cutoff_period_days * 24)))
@@ -28,6 +31,7 @@ def high_pass_dct(values, cutoff_period_days=30):
     return idct(coefficients, type=2, norm="ortho")
 
 # Plot weather outliers using DCT-based high-pass filtering and SPC limits
+@st.cache_data(max_entries=32, show_spinner="Analyzing weather outliers...")
 def plot_weather_outliers(
     weather_data,
     cutoff_period_days=30,
@@ -116,6 +120,7 @@ def plot_weather_outliers(
     return fig, outliers
 
 # Plot weather anomalies using Local Outlier Factor (LOF)
+@st.cache_data(max_entries=32, show_spinner="Analyzing weather anomalies...")
 def plot_weather_lof(
     weather_data,
     proportion_outliers=0.01,
@@ -168,6 +173,7 @@ def plot_weather_lof(
     return fig, outliers
 
 
+@st.cache_data(max_entries=32, show_spinner="Calculating weather correlation...")
 def plot_sliding_window_correlation(
     fill_rate,
     weather_data,
@@ -265,6 +271,7 @@ def plot_sliding_window_correlation(
 
 
 # STL decomposition of reservoir fill rate
+@st.cache_data(max_entries=32, show_spinner="Calculating STL decomposition...")
 def plot_stl_decomposition(fill_rate, seasonal=13, trend=53, robust=True):
     series = fill_rate.dropna().astype(float).sort_index()
 
@@ -305,6 +312,7 @@ def plot_stl_decomposition(fill_rate, seasonal=13, trend=53, robust=True):
 
 
 # Spectrogram of reservoir fill rate
+@st.cache_data(max_entries=32, show_spinner="Calculating spectrogram...")
 def plot_fill_rate_spectrogram(fill_rate, window_length=52, window_overlap=26):
     series = fill_rate.dropna().astype(float).sort_index()
 
@@ -339,6 +347,7 @@ def plot_fill_rate_spectrogram(fill_rate, window_length=52, window_overlap=26):
     return fig
 
 
+@st.cache_data(max_entries=16, show_spinner=False)
 def weekly_weather_features(weather_data, variables):
     hourly = weather_data[["time", *variables]].copy()
     hourly["time"] = (
@@ -358,6 +367,7 @@ def weekly_weather_features(weather_data, variables):
     return weekly.where(complete_weeks)
 
 
+@st.cache_data(max_entries=32, show_spinner="Training reservoir forecast...")
 def forecast_reservoir_fill_rate(
     fill_rate,
     horizon=12,

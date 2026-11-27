@@ -78,7 +78,7 @@ if weather_data is None and valid_range:
                 selected_area,
                 start_date=start_date,
                 end_date=end_date,
-                progress_callback=update_progress,
+                _progress_callback=update_progress,
             )
         except OpenMeteoRequestsError as error:
             progress.empty()
