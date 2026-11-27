@@ -39,6 +39,7 @@ pages = {
     "": [
         st.Page(pages_folder / "1_Home.py", title="Home", icon="🏠"),
         st.Page(pages_folder / "4_ENTSOE.py", title="ENTSOE", icon="⚡"),
+        st.Page(pages_folder / "9_map.py", title="Map", icon="🗺️"),
     ],
 
     "  💧 Reservoir": [
@@ -52,11 +53,6 @@ pages = {
         st.Page(pages_folder / "8_Weather_analysis.py", title="Weather analysis"),
     ],
 }
-
-page = st.navigation(pages)
-
-page = st.navigation(pages)
-
 
 page = st.navigation(pages)
 
