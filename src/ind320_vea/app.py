@@ -8,18 +8,58 @@ from ind320_vea.help_functions import load_data
 
 pages_folder = Path(__file__).parent / "pages"
 
-pages = [
-    st.Page(pages_folder / "1_Home.py", title="Home"),
-    st.Page(pages_folder / "2_Reservoir_data_first_month.py", title="Reservoir data first month"),
-    st.Page(pages_folder / "3_Reservoir_data.py", title="Reservoir data"),
-    st.Page(pages_folder / "6_Reservoir_analysis.py", title="Reservoir analysis"),
-    st.Page(pages_folder / "7_Weather_data.py", title="Weather data"),
-    st.Page(pages_folder / "8_Weather_analysis.py", title="Weather analysis"),
-    st.Page(pages_folder / "4_ENTSOE.py", title="ENTSOE"),
-    st.Page(pages_folder / "5_About.py", title="About"),
-]
+# pages = [
+#     st.Page(pages_folder / "1_Home.py", title="Home"),
+#     st.Page(pages_folder / "2_Reservoir_data_first_month.py", title="Reservoir data first month"),
+#     st.Page(pages_folder / "3_Reservoir_data.py", title="Reservoir data"),
+#     st.Page(pages_folder / "6_Reservoir_analysis.py", title="Reservoir analysis"),
+#     st.Page(pages_folder / "7_Weather_data.py", title="Weather data"),
+#     st.Page(pages_folder / "8_Weather_analysis.py", title="Weather analysis"),
+#     st.Page(pages_folder / "4_ENTSOE.py", title="ENTSOE"),
+#     st.Page(pages_folder / "5_About.py", title="About"),
+# ]
+
+# pages = {
+#     "Home": [st.Page(pages_folder / "1_Home.py", title="Home")],
+
+#     "Reservoir": [
+#         st.Page(pages_folder / "2_Reservoir_data_first_month.py", title="Reservoir data first month"),
+#         st.Page(pages_folder / "3_Reservoir_data.py", title="Reservoir data"),
+#         st.Page(pages_folder / "6_Reservoir_analysis.py", title="Reservoir analysis"),
+#     ],
+#     "Weather": [
+#         st.Page(pages_folder / "7_Weather_data.py", title="Weather data"),
+#         st.Page(pages_folder / "8_Weather_analysis.py", title="Weather analysis"),
+#     ],
+
+#     "": [st.Page(pages_folder / "4_ENTSOE.py", title="ENTSOE")]
+# }
+
+pages = {
+    "": [
+        st.Page(pages_folder / "1_Home.py", title="Home", icon="🏠"),
+        st.Page(pages_folder / "4_ENTSOE.py", title="ENTSOE", icon="⚡"),
+    ],
+
+    "  💧 Reservoir": [
+        st.Page(pages_folder / "2_Reservoir_data_first_month.py", title="Reservoir data first month"),
+        st.Page(pages_folder / "3_Reservoir_data.py", title="Reservoir data"),
+        st.Page(pages_folder / "6_Reservoir_analysis.py", title="Reservoir analysis"),
+    ],
+
+    "🌦️ Weather": [
+        st.Page(pages_folder / "7_Weather_data.py", title="Weather data"),
+        st.Page(pages_folder / "8_Weather_analysis.py", title="Weather analysis"),
+    ],
+}
 
 page = st.navigation(pages)
+
+page = st.navigation(pages)
+
+
+page = st.navigation(pages)
+
 st.session_state.setdefault(
     "weather_date_range",
     (date(2024, 1, 1), date(2024, 12, 31)),
