@@ -1,5 +1,6 @@
 from datetime import date
 import streamlit as st
+from openmeteo_requests import OpenMeteoRequestsError
 
 from ind320_vea.weather_functions import (
     download_weather_data,
@@ -62,23 +63,30 @@ if weather_data is None and valid_range:
     st.info("Weather data for this area and period has not been loaded.")
 
     if st.button("Load weather data", type="primary"):
-        progress = st.progress(0, text="Preparing the download...")
+        progress = st.progress(0, text="Preparing weather coordinates...")
 
-        def update_progress(current_batch, total_batches):
+        def update_progress(current_batch, total_batches, status=None):
+            if status is None:
+                status = f"Downloading batch {current_batch} of {total_batches}"
             progress.progress(
-                current_batch / total_batches,
-                text=f"Downloading batch {current_batch} of {total_batches}",
+                current_batch / total_batches if total_batches else 0,
+                text=status,
             )
 
-        weather_data = download_weather_data(
-            selected_area,
-            start_date=start_date,
-            end_date=end_date,
-            progress_callback=update_progress,
-        )
-        st.session_state["weather_data"] = weather_data
-        st.session_state["weather_data_key"] = data_key
-        progress.empty()
+        try:
+            weather_data = download_weather_data(
+                selected_area,
+                start_date=start_date,
+                end_date=end_date,
+                _progress_callback=update_progress,
+            )
+        except OpenMeteoRequestsError as error:
+            progress.empty()
+            st.error(f"Open-Meteo could not return the weather data: {error}")
+        else:
+            st.session_state["weather_data"] = weather_data
+            st.session_state["weather_data_key"] = data_key
+            progress.empty()
 
 if weather_data is not None:
     st.success("Weather data for the selected period is ready.")

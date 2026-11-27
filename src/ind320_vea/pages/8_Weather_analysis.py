@@ -1,9 +1,11 @@
 import streamlit as st
 
 from ind320_vea.analysis_functions import (
-    plot_precipitation_outliers,
-    plot_temperature_lof,
+    plot_sliding_window_correlation,
+    plot_weather_outliers,
+    plot_weather_lof,
 )
+from ind320_vea.help_functions import load_data
 from ind320_vea.weather_functions import weather_data_session_key
 
 
@@ -20,15 +22,30 @@ weather_data = (
 
 st.caption(f"Weather data for interval: {start_date} to {end_date}")
 
-precipitation_tab, temperature_tab = st.tabs(
-    ["Outlier / SPC", "Anomaly / LOF"]
+spc_tab, lof_tab, correlation_tab = st.tabs(
+    ["Outlier / SPC", "Anomaly / LOF", "Weather / filling correlation"]
 )
 
-with precipitation_tab:
-    st.subheader("Precipitation outliers")
+# SPC/SATV
+with spc_tab:
     if weather_data is None:
         st.info("Load the weather data on the Weather data page first.")
     else:
+        weather_property = st.radio(
+            "Weather property SATV",
+            options=["temperature_2m", "precipitation"],
+            format_func=lambda value: {
+                "temperature_2m": "Temperature",
+                "precipitation": "Precipitation",
+            }[value],
+            horizontal=True,
+        )
+        property_name = {
+            "temperature_2m": "Temperature",
+            "precipitation": "Precipitation",
+        }[weather_property]
+        st.subheader(f"{property_name} outliers")
+
         cutoff_period_days = st.slider(
             "DCT cutoff period (days)",
             min_value=7,
@@ -44,21 +61,40 @@ with precipitation_tab:
         )
         display_daily = st.checkbox("Show daily average", value=True)
 
-        fig, outliers = plot_precipitation_outliers(
+        fig, outliers = plot_weather_outliers(
             weather_data,
             cutoff_period_days=cutoff_period_days,
             n_std=n_std,
             display_daily=display_daily,
+            weather_property=weather_property,
         )
+
         st.plotly_chart(fig, width="stretch")
-        st.metric("Precipitation outliers", len(outliers))
+        st.metric(f"{property_name} outliers", len(outliers))
         st.dataframe(outliers, hide_index=True)
 
-with temperature_tab:
-    st.subheader("Temperature anomalies")
+
+# LOF
+with lof_tab:
     if weather_data is None:
         st.info("Load the weather data on the Weather data page first.")
     else:
+        weather_property_lof = st.radio(
+            "LOF weather property",
+            options=["temperature_2m", "precipitation"],
+            format_func=lambda value: {
+                "temperature_2m": "Temperature",
+                "precipitation": "Precipitation",
+            }[value],
+            horizontal=True,
+            key="lof_weather_property",
+        )
+        property_name_lof = {
+            "temperature_2m": "Temperature",
+            "precipitation": "Precipitation",
+        }[weather_property_lof]
+        st.subheader(f"{property_name_lof} anomalies")
+
         proportion_outliers = st.slider(
             "Proportion of outliers",
             min_value=0.001,
@@ -69,10 +105,69 @@ with temperature_tab:
         
         st.caption(f"Selected proportion: {proportion_outliers:.1%}")
 
-        fig, anomalies = plot_temperature_lof(
+        fig, anomalies = plot_weather_lof(
             weather_data,
             proportion_outliers=proportion_outliers,
+            weather_property=weather_property_lof,
         )
         st.plotly_chart(fig, width="stretch")
-        st.metric("Temperature anomalies", len(anomalies))
+        st.metric(f"{property_name_lof} anomalies", len(anomalies))
         st.dataframe(anomalies, hide_index=True)
+
+
+# Compare the selected weather property with weekly reservoir filling.
+with correlation_tab:
+    if weather_data is None:
+        st.info("Load the weather data on the Weather data page first.")
+    else:
+        reservoir_data = load_data()
+        area_data = reservoir_data.loc[
+            (reservoir_data["area_type"] == selected_area[0])
+            & (reservoir_data["area_number"] == selected_area[1])
+        ]
+        fill_rate = (
+            area_data.set_index("date_Id")["fill_rate"]
+            .sort_index()
+        )
+
+        weather_property_correlation = st.radio(
+            "Weather property for correlation",
+            options=["temperature_2m", "precipitation"],
+            format_func=lambda value: {
+                "temperature_2m": "Temperature",
+                "precipitation": "Precipitation",
+            }[value],
+            horizontal=True,
+            key="correlation_weather_property",
+        )
+        lag_weeks = st.slider(
+            "Weather lead (weeks)",
+            min_value=0,
+            max_value=12,
+            value=0,
+        )
+        window_weeks = st.slider(
+            "Window length (weeks)",
+            min_value=4,
+            max_value=26,
+            value=13,
+        )
+
+        # Positive lag means weather is compared with filling in later weeks.
+        st.caption(
+            "Positive lag means weather leads reservoir filling by that many weeks."
+        )
+        correlation_fig, correlation = plot_sliding_window_correlation(
+            fill_rate,
+            weather_data,
+            weather_property=weather_property_correlation,
+            lag_weeks=lag_weeks,
+            window_weeks=window_weeks,
+        )
+        if correlation.empty:
+            st.info(
+                "No valid correlation values for this period and these settings. "
+                "Try a shorter window or a smaller lag."
+            )
+        else:
+            st.plotly_chart(correlation_fig, width="stretch")

@@ -101,9 +101,9 @@ def weather_data_session_key(selected_area, start_date, end_date):
 def get_openmeteo_client():
     cache_session = requests_cache.CachedSession(
         backend="memory",
-        expire_after=-1,
+        expire_after=86400,
     )
-    retry_session = retry(cache_session, retries=5, backoff_factor=0.5)
+    retry_session = retry(cache_session, retries=2, backoff_factor=0.5)
     return openmeteo_requests.Client(session=retry_session)
 
 
@@ -163,11 +163,15 @@ def average_weather_responses(responses):
     })
 
 
+@st.cache_data(ttl=86400, max_entries=20, show_spinner=False)
 def download_weather_data(
-    selected_area, start_date, end_date, progress_callback=None
+    selected_area, start_date, end_date, _progress_callback=None
 ):
+    # The callback is excluded from the cache key but still updates first-time downloads.
     start_date, end_date = validate_weather_dates(start_date, end_date)
 
+    if _progress_callback is not None:
+        _progress_callback(0, 1, "Preparing weather coordinates...")
     regions = weather_regions_for_area(selected_area)
     coordinates_by_region = get_weather_coordinates()
     coordinates = [
@@ -180,11 +184,24 @@ def download_weather_data(
     batch_count = (len(coordinates) + batch_size - 1) // batch_size
     batch_averages = []
     client = get_openmeteo_client()
+    if _progress_callback is not None:
+        _progress_callback(
+            0,
+            batch_count,
+            f"Prepared {len(coordinates)} locations; starting {batch_count} batches.",
+        )
 
     for batch_number, batch_start in enumerate(
         range(0, len(coordinates), batch_size), start=1
     ):
         batch = coordinates[batch_start:batch_start + batch_size]
+        # Show the active request before waiting for its response.
+        if _progress_callback is not None:
+            _progress_callback(
+                batch_number - 1,
+                batch_count,
+                f"Requesting batch {batch_number} of {batch_count}...",
+            )
         longitudes, latitudes = zip(*batch)
         params = {
             "latitude": list(latitudes),
@@ -195,15 +212,19 @@ def download_weather_data(
             "models": "era5",
             "timezone": "UTC",
         }
-        responses = client.weather_api(WEATHER_API_URL, params=params, timeout=120)
+        responses = client.weather_api(WEATHER_API_URL, params=params, timeout=45)
         if len(responses) != len(batch):
             raise ValueError(
                 f"Expected {len(batch)} API responses, received {len(responses)}."
             )
         batch_averages.append(average_weather_responses(responses))
 
-        if progress_callback is not None:
-            progress_callback(batch_number, batch_count)
+        if _progress_callback is not None:
+            _progress_callback(
+                batch_number,
+                batch_count,
+                f"Downloaded batch {batch_number} of {batch_count}.",
+            )
 
     weighted_batches = []
     for batch_average, batch_start in zip(
