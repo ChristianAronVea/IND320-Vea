@@ -4,6 +4,8 @@ import streamlit as st
 from plotly.subplots import make_subplots
 
 from ind320_vea.help_functions import load_data
+from ind320_vea.analysis_functions import colors
+
 
 st.title("Reservoir Data First Month")
 
@@ -57,6 +59,7 @@ for row, column in enumerate(plot_columns, start=1):
             mode="lines+markers",
             name=column,
             showlegend=False,
+            line={"color": colors[row -1 % len(colors)]},
         ),
         row=row,
         col=1,

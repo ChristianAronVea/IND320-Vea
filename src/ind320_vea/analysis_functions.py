@@ -7,6 +7,9 @@ from scipy.signal import spectrogram
 from sklearn.neighbors import LocalOutlierFactor
 from statsmodels.tsa.seasonal import STL
 
+# color theme on graphs
+colors = ["#1b7390", "#cf771f", "#2aaa2a", "#ffff03", "#FF2CDC"]
+
 # get the hourly series of a variable from the weather data
 def get_hourly_series(weather_data, variable):
     data = weather_data[["time", variable]].copy()
@@ -56,6 +59,7 @@ def plot_precipitation_outliers(weather_data, cutoff_period_days=30, n_std=3, di
     fig.add_trace(go.Scatter(
         x=plot_precipitation.index,
         y=plot_precipitation,
+        line={"color": colors[0]},
         mode="lines",
         name=line_label,
     ))
@@ -63,21 +67,21 @@ def plot_precipitation_outliers(weather_data, cutoff_period_days=30, n_std=3, di
         x=plot_lower_limit.index,
         y=plot_lower_limit,
         mode="lines",
-        line={"color": "darkorange"},
+        line={"color": colors[1]},
         name="SPC lower limit",
     ))
     fig.add_trace(go.Scatter(
         x=plot_upper_limit.index,
         y=plot_upper_limit,
         mode="lines",
-        line={"color": "darkorange"},
+        line={"color": colors[1]},
         name="SPC upper limit",
     ))
     fig.add_trace(go.Scatter(
         x=precipitation.index[is_outlier],
         y=precipitation.to_numpy()[is_outlier],
         mode="markers",
-        marker={"color": "crimson"},
+        marker={"color":"crimson"},
         name="Outlier",
     ))
     fig.update_layout(
@@ -111,6 +115,7 @@ def plot_temperature_lof(weather_data, proportion_outliers=0.01):
         x=temperature.index,
         y=temperature,
         mode="lines",
+        line={"color": colors[0]},
         name="Average temperature",
     ))
     fig.add_trace(go.Scatter(
@@ -161,7 +166,8 @@ def plot_stl_decomposition(fill_rate, seasonal=13, trend=53, robust=True):
     )
     for row, component in enumerate(components, start=1):
         fig.add_trace(
-            go.Scatter(x=series.index, y=component, mode="lines", showlegend=False),
+            go.Scatter(x=series.index, y=component, mode="lines", showlegend=False, 
+                       line={"color": colors[row - 1]}),
             row=row,
             col=1,
         )
@@ -195,7 +201,7 @@ def plot_fill_rate_spectrogram(fill_rate, window_length=52, window_overlap=26):
             x=dates,
             y=frequencies[1:],
             z=power_db,
-            colorscale="Viridis",
+            colorscale=[[0, colors[3]], [0.33, colors[2]], [0.67, colors[1]], [1, colors[0]]],
             colorbar={"title": "Power (dB)"},
         )
     )

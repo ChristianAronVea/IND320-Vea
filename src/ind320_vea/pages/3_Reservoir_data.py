@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from ind320_vea.help_functions import load_data
+from ind320_vea.analysis_functions import colors
 
 st.title("Reservoir data")
 
@@ -67,15 +68,15 @@ plot_data = month_data[["date_Id"] + plot_columns].sort_values("date_Id")
 
 # Create the plot
 fig = go.Figure()
-for column in plot_columns:
-    fig.add_trace(
-        go.Scatter(
-            x=plot_data["date_Id"],
-            y=plot_data[column],
-            mode="lines",
-            name=column,
-        )
-    )
+for i, column in enumerate(plot_columns):
+    fig.add_trace(go.Scatter(
+        x=plot_data["date_Id"],
+        y=plot_data[column],
+        mode="lines",
+        name=column,
+        line={"color": colors[i % len(colors)]},
+    ))
+
 fig.update_layout(
     title="Reservoir data over time",
     xaxis_title="Date",
