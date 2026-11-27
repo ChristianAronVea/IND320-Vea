@@ -1,7 +1,7 @@
 import streamlit as st
 
 from ind320_vea.analysis_functions import (
-    plot_precipitation_outliers,
+    plot_weather_outliers,
     plot_temperature_lof,
 )
 from ind320_vea.weather_functions import weather_data_session_key
@@ -20,15 +20,29 @@ weather_data = (
 
 st.caption(f"Weather data for interval: {start_date} to {end_date}")
 
-precipitation_tab, temperature_tab = st.tabs(
+spc_tab, lof_tab = st.tabs(
     ["Outlier / SPC", "Anomaly / LOF"]
 )
 
-with precipitation_tab:
-    st.subheader("Precipitation outliers")
+with spc_tab:
     if weather_data is None:
         st.info("Load the weather data on the Weather data page first.")
     else:
+        weather_property = st.radio(
+            "Weather property",
+            options=["temperature_2m", "precipitation"],
+            format_func=lambda value: {
+                "temperature_2m": "Temperature",
+                "precipitation": "Precipitation",
+            }[value],
+            horizontal=True,
+        )
+        property_name = {
+            "temperature_2m": "Temperature",
+            "precipitation": "Precipitation",
+        }[weather_property]
+        st.subheader(f"{property_name} outliers")
+
         cutoff_period_days = st.slider(
             "DCT cutoff period (days)",
             min_value=7,
@@ -44,17 +58,19 @@ with precipitation_tab:
         )
         display_daily = st.checkbox("Show daily average", value=True)
 
-        fig, outliers = plot_precipitation_outliers(
+        fig, outliers = plot_weather_outliers(
             weather_data,
             cutoff_period_days=cutoff_period_days,
             n_std=n_std,
             display_daily=display_daily,
+            weather_property=weather_property,
         )
+
         st.plotly_chart(fig, width="stretch")
-        st.metric("Precipitation outliers", len(outliers))
+        st.metric(f"{property_name} outliers", len(outliers))
         st.dataframe(outliers, hide_index=True)
 
-with temperature_tab:
+with lof_tab:
     st.subheader("Temperature anomalies")
     if weather_data is None:
         st.info("Load the weather data on the Weather data page first.")

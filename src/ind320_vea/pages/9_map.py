@@ -146,7 +146,7 @@ if map_values:
     ]
     if selected_map_ids:
         selected_map_data = map_data.loc[map_data["map_id"].isin(selected_map_ids)]
-        # Draw a second transparent layer to outline the selected area.
+        # Draw a transparent layer to outline the selected area.
         fig.add_trace(
             go.Choroplethmap(
                 geojson=geojson,

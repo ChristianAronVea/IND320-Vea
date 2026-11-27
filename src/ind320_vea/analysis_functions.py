@@ -26,39 +26,53 @@ def high_pass_dct(values, cutoff_period_days=30):
     coefficients[:max(1, low_frequency_count)] = 0
     return idct(coefficients, type=2, norm="ortho")
 
-# Plot precipitation outliers using DCT-based high-pass filtering and SPC limits
-def plot_precipitation_outliers(weather_data, cutoff_period_days=30, n_std=3, display_daily=True):
-    precipitation = get_hourly_series(weather_data, "precipitation")
-    satv = high_pass_dct(precipitation.to_numpy(), cutoff_period_days)
+# Plot weather outliers using DCT-based high-pass filtering and SPC limits
+def plot_weather_outliers(
+    weather_data,
+    cutoff_period_days=30,
+    n_std=3,
+    display_daily=True,
+    weather_property="temperature_2m",
+):
+    property_labels = {
+        "temperature_2m": ("Temperature", "deg C"),
+        "precipitation": ("Precipitation", "mm/hour"),
+    }
+    if weather_property not in property_labels:
+        raise ValueError(f"Unsupported weather property: {weather_property}")
+
+    property_name, unit = property_labels[weather_property]
+    series = get_hourly_series(weather_data, weather_property)
+    satv = high_pass_dct(series.to_numpy(), cutoff_period_days)
     center = np.median(satv)
     spread = 1.4826 * np.median(np.abs(satv - center))
     if spread == 0:
         spread = np.std(satv)
 
-    baseline = precipitation.to_numpy() - satv
+    baseline = series.to_numpy() - satv
     lower_limit = baseline + center - n_std * spread
     upper_limit = baseline + center + n_std * spread
     is_outlier = (satv < center - n_std * spread) | (satv > center + n_std * spread)
 
     if display_daily:
-        plot_precipitation = precipitation.resample("D").mean()
+        plot_series = series.resample("D").mean()
         plot_lower_limit = pd.Series(
-            lower_limit, index=precipitation.index
+            lower_limit, index=series.index
         ).resample("D").mean()
         plot_upper_limit = pd.Series(
-            upper_limit, index=precipitation.index
+            upper_limit, index=series.index
         ).resample("D").mean()
-        line_label = "Daily average precipitation"
+        line_label = f"Daily average {property_name.lower()}"
     else:
-        plot_precipitation = precipitation
-        plot_lower_limit = pd.Series(lower_limit, index=precipitation.index)
-        plot_upper_limit = pd.Series(upper_limit, index=precipitation.index)
-        line_label = "Hourly average precipitation"
+        plot_series = series
+        plot_lower_limit = pd.Series(lower_limit, index=series.index)
+        plot_upper_limit = pd.Series(upper_limit, index=series.index)
+        line_label = f"Hourly average {property_name.lower()}"
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=plot_precipitation.index,
-        y=plot_precipitation,
+        x=plot_series.index,
+        y=plot_series,
         line={"color": colors[0]},
         mode="lines",
         name=line_label,
@@ -78,23 +92,23 @@ def plot_precipitation_outliers(weather_data, cutoff_period_days=30, n_std=3, di
         name="SPC upper limit",
     ))
     fig.add_trace(go.Scatter(
-        x=precipitation.index[is_outlier],
-        y=precipitation.to_numpy()[is_outlier],
+        x=series.index[is_outlier],
+        y=series.to_numpy()[is_outlier],
         mode="markers",
         marker={"color":"crimson"},
         name="Outlier",
     ))
     fig.update_layout(
-        title="Average precipitation with SPC outliers",
+        title=f"Average {property_name.lower()} with SPC outliers",
         xaxis_title="Time (UTC)",
-        yaxis_title="Precipitation (mm/hour)",
+        yaxis_title=f"{property_name} ({unit})",
         template="plotly_white",
         hovermode="x unified",
     )
 
     outliers = pd.DataFrame({
-        "time": precipitation.index[is_outlier],
-        "precipitation": precipitation.to_numpy()[is_outlier],
+        "time": series.index[is_outlier],
+        weather_property: series.to_numpy()[is_outlier],
         "lower_limit": lower_limit[is_outlier],
         "upper_limit": upper_limit[is_outlier],
     })
