@@ -114,42 +114,54 @@ def plot_weather_outliers(
     })
     return fig, outliers
 
-# Plot temperature anomalies using Local Outlier Factor (LOF)
-def plot_temperature_lof(weather_data, proportion_outliers=0.01):
-    temperature = get_hourly_series(weather_data, "temperature_2m")
+# Plot weather anomalies using Local Outlier Factor (LOF)
+def plot_weather_lof(
+    weather_data,
+    proportion_outliers=0.01,
+    weather_property="temperature_2m",
+):
+    property_labels = {
+        "temperature_2m": ("Temperature", "deg C"),
+        "precipitation": ("Precipitation", "mm/hour"),
+    }
+    if weather_property not in property_labels:
+        raise ValueError(f"Unsupported weather property: {weather_property}")
+
+    property_name, unit = property_labels[weather_property]
+    series = get_hourly_series(weather_data, weather_property)
     lof = LocalOutlierFactor(
-        n_neighbors=min(20, len(temperature) - 1),
+        n_neighbors=min(20, len(series) - 1),
         contamination=proportion_outliers,
     )
-    is_anomaly = lof.fit_predict(temperature.to_numpy().reshape(-1, 1)) == -1
+    is_anomaly = lof.fit_predict(series.to_numpy().reshape(-1, 1)) == -1
     lof_score = -lof.negative_outlier_factor_
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=temperature.index,
-        y=temperature,
+        x=series.index,
+        y=series,
         mode="lines",
         line={"color": colors[0]},
-        name="Average temperature",
+        name=f"Average {property_name.lower()}",
     ))
     fig.add_trace(go.Scatter(
-        x=temperature.index[is_anomaly],
-        y=temperature.to_numpy()[is_anomaly],
+        x=series.index[is_anomaly],
+        y=series.to_numpy()[is_anomaly],
         mode="markers",
         marker={"color": "crimson"},
         name="LOF anomaly",
     ))
     fig.update_layout(
-        title="Average temperature with LOF anomalies",
+        title=f"Average {property_name.lower()} with LOF anomalies",
         xaxis_title="Time (UTC)",
-        yaxis_title="Temperature (deg C)",
+        yaxis_title=f"{property_name} ({unit})",
         template="plotly_white",
         hovermode="x unified",
     )
 
     outliers = pd.DataFrame({
-        "time": temperature.index[is_anomaly],
-        "temperature_2m": temperature.to_numpy()[is_anomaly],
+        "time": series.index[is_anomaly],
+        weather_property: series.to_numpy()[is_anomaly],
         "lof_score": lof_score[is_anomaly],
     })
     return fig, outliers

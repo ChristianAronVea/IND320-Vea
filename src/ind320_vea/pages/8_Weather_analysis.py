@@ -2,7 +2,7 @@ import streamlit as st
 
 from ind320_vea.analysis_functions import (
     plot_weather_outliers,
-    plot_temperature_lof,
+    plot_weather_lof,
 )
 from ind320_vea.weather_functions import weather_data_session_key
 
@@ -24,12 +24,13 @@ spc_tab, lof_tab = st.tabs(
     ["Outlier / SPC", "Anomaly / LOF"]
 )
 
+# SPC/SATV
 with spc_tab:
     if weather_data is None:
         st.info("Load the weather data on the Weather data page first.")
     else:
         weather_property = st.radio(
-            "Weather property",
+            "Weather property SATV",
             options=["temperature_2m", "precipitation"],
             format_func=lambda value: {
                 "temperature_2m": "Temperature",
@@ -70,11 +71,28 @@ with spc_tab:
         st.metric(f"{property_name} outliers", len(outliers))
         st.dataframe(outliers, hide_index=True)
 
+
+# LOF
 with lof_tab:
-    st.subheader("Temperature anomalies")
     if weather_data is None:
         st.info("Load the weather data on the Weather data page first.")
     else:
+        weather_property_lof = st.radio(
+            "LOF weather property",
+            options=["temperature_2m", "precipitation"],
+            format_func=lambda value: {
+                "temperature_2m": "Temperature",
+                "precipitation": "Precipitation",
+            }[value],
+            horizontal=True,
+            key="lof_weather_property",
+        )
+        property_name_lof = {
+            "temperature_2m": "Temperature",
+            "precipitation": "Precipitation",
+        }[weather_property_lof]
+        st.subheader(f"{property_name_lof} anomalies")
+
         proportion_outliers = st.slider(
             "Proportion of outliers",
             min_value=0.001,
@@ -85,10 +103,11 @@ with lof_tab:
         
         st.caption(f"Selected proportion: {proportion_outliers:.1%}")
 
-        fig, anomalies = plot_temperature_lof(
+        fig, anomalies = plot_weather_lof(
             weather_data,
             proportion_outliers=proportion_outliers,
+            weather_property=weather_property_lof,
         )
         st.plotly_chart(fig, width="stretch")
-        st.metric("Temperature anomalies", len(anomalies))
+        st.metric(f"{property_name_lof} anomalies", len(anomalies))
         st.dataframe(anomalies, hide_index=True)
