@@ -1,3 +1,42 @@
+Assignment 4
+
+This assignment has taken a few different turns. I started with the work in Part4.ipynb and wanted to
+get the forecast into the app without making it too complicated. I decided to make a separate page
+for it, since the controls and the forecast plot would not fit very well on the other pages. It took
+some testing to get it to use the selected area and date in the way I wanted.
+
+On the new page, the user can choose how much history to use and how many weeks to forecast. The
+date selected on the map is used as the end of the training period, so the map and forecast are
+connected. I kept the data weekly. It matches the reservoir data and means the model does not have
+to work through an unnecessary amount of information.
+
+I also added temperature and precipitation as things the model can use when making a prediction.
+This was a bit tricky, because the model needs weather data for the weeks it is forecasting too.
+There is no actual weather forecast for all of that time, so for now I use the same weeks from the
+previous year as a rough estimate. It is not perfect, but it lets me try the model with weather data
+and is clear about what is being assumed. The forecast is animated, which makes it easier to follow
+how the predicted filling changes week by week.
+
+Another thing I worked on was making the waiting less confusing. Some of the data takes time to
+load, and before it could be hard to tell if the app was still working. There is now progress shown
+while weather data is downloaded, and a loading sign over the map when it updates. I also added
+caching in the places that were repeatedly downloading or calculating the same things. The first
+load can still take a little while, but going back to the same data should be quicker.
+
+I tested the page with made-up reservoir and weather data, and checked that it works both with and
+without weather variables. I also checked that the plots appear and that the loading progress and
+caching still work. This was useful for finding problems without relying on the real APIs every time.
+It does not tell me how accurate the forecast will be with real future weather, so that part still
+needs to be treated carefully.
+
+There was a lot to connect, but I think keeping the page separate and the choices understandable
+made the end result easier to use.
+
+
+
+----------------------------------------------------------------------------------------------------
+
+
 Assignment 3
 
 This assignment was a battle with the APIs. It started right away with the weather data. First I used the 
