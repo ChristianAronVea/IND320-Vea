@@ -66,6 +66,7 @@ selected_date = st.date_input(
     value=latest_date,
     min_value=reservoir_data["date_Id"].min().date(),
     max_value=latest_date,
+    key="map_selected_date",
 )
 
 dataset = AREA_DATASETS[selected_dataset]

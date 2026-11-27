@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from river import time_series
 from scipy.fft import dct, idct
 from scipy.signal import spectrogram
 from sklearn.neighbors import LocalOutlierFactor
@@ -334,5 +335,175 @@ def plot_fill_rate_spectrogram(fill_rate, window_length=52, window_overlap=26):
         yaxis_title="Frequency (cycles per week)",
         yaxis_type="log",
         template="plotly_white",
+    )
+    return fig
+
+
+def weekly_weather_features(weather_data, variables):
+    hourly = weather_data[["time", *variables]].copy()
+    hourly["time"] = (
+        pd.to_datetime(hourly["time"], utc=True)
+        .dt.tz_localize(None)
+    )
+    hourly = hourly.set_index("time").sort_index()
+    # Match the weekly reservoir data: average temperature and sum precipitation.
+    aggregations = {
+        variable: "sum" if variable == "precipitation" else "mean"
+        for variable in variables
+    }
+    weekly = hourly[list(variables)].resample("W-SUN").agg(aggregations)
+    complete_weeks = (
+        hourly[list(variables)].resample("W-SUN").count().ge(168).all(axis=1)
+    )
+    return weekly.where(complete_weeks)
+
+
+def forecast_reservoir_fill_rate(
+    fill_rate,
+    horizon=12,
+    history=120,
+    p=3,
+    d=0,
+    q=3,
+    m=26,
+    sp=3,
+    sd=1,
+    sq=1,
+    exogenous=None,
+    future_exogenous=None,
+):
+    series = pd.to_numeric(fill_rate).dropna().sort_index()
+    train = series.iloc[-history:]
+    future_dates = pd.date_range(
+        start=train.index[-1] + pd.Timedelta(weeks=1),
+        periods=horizon,
+        freq="7D",
+    )
+
+    if exogenous is None:
+        training_features = None
+        future_features = [{} for _ in range(horizon)]
+    else:
+        training_features = exogenous.reindex(train.index)
+        future_features = future_exogenous.to_dict(orient="records")
+
+    model = time_series.SNARIMAX(p, d, q, m, sp, sd, sq)
+    for index, value in train.items():
+        features = {}
+        if training_features is not None:
+            row = training_features.loc[index].dropna()
+            features = {key: float(item) for key, item in row.items()}
+        model.learn_one(float(value), x=features)
+
+    # River advances its internal state for each step in the forecast horizon.
+    predictions = model.forecast(horizon, xs=future_features)
+    return pd.DataFrame({"forecast": predictions}, index=future_dates)
+
+
+def plot_reservoir_forecast_animation(fill_rate, forecast):
+    observed = fill_rate.dropna().sort_index()
+    forecast = forecast.sort_index()
+
+    last_date = observed.index[-1]
+    last_value = float(observed.iloc[-1])
+    initial_forecast = go.Scatter(
+        x=[last_date, forecast.index[0]],
+        y=[last_value, float(forecast["forecast"].iloc[0])],
+        mode="lines+markers",
+        name="Forecast",
+        line={"color": colors[1], "dash": "dash"},
+    )
+    fig = go.Figure(
+        data=[
+            go.Scatter(
+                x=observed.index,
+                y=observed,
+                mode="lines",
+                name="Observed filling",
+                line={"color": colors[0]},
+            ),
+            initial_forecast,
+        ]
+    )
+    # Each frame reveals one more week of the dynamic forecast.
+    fig.frames = [
+        go.Frame(
+            name=str(step),
+            data=[
+                go.Scatter(
+                    x=[last_date, *forecast.index[:step]],
+                    y=[
+                        last_value,
+                        *forecast["forecast"].iloc[:step].astype(float),
+                    ],
+                    mode="lines+markers",
+                    line={"color": colors[1], "dash": "dash"},
+                )
+            ],
+            traces=[1],
+        )
+        for step in range(1, len(forecast) + 1)
+    ]
+    fig.update_layout(
+        title="Reservoir filling forecast",
+        xaxis_title="Date",
+        yaxis_title="Fill rate",
+        xaxis_range=[observed.index.min(), forecast.index.max()],
+        template="plotly_white",
+        hovermode="x unified",
+        updatemenus=[
+            {
+                "type": "buttons",
+                "bgcolor": "#F0F2F6",
+                "bordercolor": "#9CA3AF",
+                "borderwidth": 1,
+                "font": {"color": "#222222"},
+                "buttons": [
+                    {
+                        "label": "Play",
+                        "method": "animate",
+                        "args": [
+                            None,
+                            {
+                                "frame": {"duration": 250, "redraw": True},
+                                "fromcurrent": True,
+                            },
+                        ],
+                    },
+                    {
+                        "label": "Pause",
+                        "method": "animate",
+                        "args": [
+                            [None],
+                            {"frame": {"duration": 0}, "mode": "immediate"},
+                        ],
+                    },
+                ],
+            }
+        ],
+        sliders=[
+            {
+                "bgcolor": "#F0F2F6",
+                "bordercolor": "#9CA3AF",
+                "borderwidth": 1,
+                "font": {"color": "#222222"},
+                "steps": [
+                    {
+                        "label": str(step),
+                        "method": "animate",
+                        "args": [
+                            [str(step)],
+                            {
+                                "mode": "immediate",
+                                "frame": {"duration": 0, "redraw": True},
+                                "transition": {"duration": 0},
+                            },
+                        ],
+                    }
+                    for step in range(1, len(forecast) + 1)
+                ],
+                "currentvalue": {"prefix": "Forecast week: "},
+            }
+        ],
     )
     return fig

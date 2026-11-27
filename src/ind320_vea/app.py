@@ -46,6 +46,7 @@ pages = {
         st.Page(pages_folder / "2_Reservoir_data_first_month.py", title="Reservoir data first month"),
         st.Page(pages_folder / "3_Reservoir_data.py", title="Reservoir data"),
         st.Page(pages_folder / "6_Reservoir_analysis.py", title="Reservoir analysis"),
+        st.Page(pages_folder / "10_Reservoir_forcasting.py", title="Reservoir forecasting"),
     ],
 
     "🌦️ Weather": [
