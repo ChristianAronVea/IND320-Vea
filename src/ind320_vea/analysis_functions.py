@@ -166,6 +166,103 @@ def plot_weather_lof(
     })
     return fig, outliers
 
+
+def plot_sliding_window_correlation(
+    fill_rate,
+    weather_data,
+    weather_property="temperature_2m",
+    lag_weeks=0,
+    window_weeks=13,
+):
+    property_labels = {
+        "temperature_2m": "Temperature",
+        "precipitation": "Precipitation",
+    }
+    if weather_property not in property_labels:
+        raise ValueError(f"Unsupported weather property: {weather_property}")
+    if lag_weeks < 0:
+        raise ValueError("Lag must be zero or a positive number of weeks.")
+    if window_weeks < 2:
+        raise ValueError("Window length must be at least two weeks.")
+
+    hourly_weather = get_hourly_series(weather_data, weather_property)
+    # Keep UTC calendar weeks while matching NVE's timezone-naive date labels.
+    hourly_weather.index = hourly_weather.index.tz_localize(None)
+    weekly_weather = hourly_weather.resample("W-SUN")
+
+    # Match the weekly NVE data and exclude partial weather weeks.
+    if weather_property == "precipitation":
+        weekly_weather = weekly_weather.sum()
+    else:
+        weekly_weather = weekly_weather.mean()
+    complete_weeks = hourly_weather.resample("W-SUN").count() == 168
+    weekly_weather = weekly_weather.where(complete_weeks)
+
+    fill_index = pd.DatetimeIndex(pd.to_datetime(fill_rate.index))
+    if fill_index.tz is not None:
+        fill_index = fill_index.tz_convert("UTC").tz_localize(None)
+    fill_index = fill_index.normalize()
+    weekly_fill_rate = pd.Series(
+        pd.to_numeric(fill_rate, errors="raise").to_numpy(dtype=float),
+        index=fill_index,
+    )
+    weekly_fill_rate = weekly_fill_rate.groupby(level=0).mean().sort_index()
+
+    valid_fill_dates = weekly_fill_rate.dropna().index
+    valid_weather_dates = weekly_weather.dropna().index
+    correlation = pd.Series(dtype=float)
+    if len(valid_fill_dates) and len(valid_weather_dates):
+        # Keep calendar weeks so the lag always means actual weeks, even across gaps.
+        week_index = pd.date_range(
+            min(valid_fill_dates.min(), valid_weather_dates.min()),
+            max(valid_fill_dates.max(), valid_weather_dates.max()),
+            freq="W-SUN",
+        )
+        aligned = pd.DataFrame(
+            {
+                "fill_rate": weekly_fill_rate.reindex(week_index),
+                "weather": weekly_weather.reindex(week_index),
+            }
+        )
+
+        # A positive lag pairs earlier weather with a later filling observation.
+        lagged_weather = aligned["weather"].shift(lag_weeks)
+        # Center the window so each correlation is dated at its midpoint.
+        correlation = (
+            aligned["fill_rate"]
+            .rolling(
+                window=window_weeks,
+                min_periods=window_weeks,
+                center=True,
+            )
+            .corr(lagged_weather)
+            .dropna()
+        )
+
+    fig = go.Figure()
+    if not correlation.empty:
+        fig.add_trace(go.Scatter(
+            x=correlation.index,
+            y=correlation,
+            mode="lines",
+            line={"color": colors[0]},
+            name="Rolling correlation",
+        ))
+        fig.add_hline(y=0, line_dash="dash", line_color="gray")
+    fig.update_layout(
+        title=(
+            f"Centered {window_weeks}-week rolling correlation: "
+            f"{property_labels[weather_property].lower()} and reservoir filling"
+        ),
+        xaxis_title="Center week of the rolling window",
+        yaxis_title="Pearson correlation",
+        yaxis_range=[-1, 1],
+        template="plotly_white",
+        hovermode="x unified",
+    )
+    return fig, correlation
+
+
 # STL decomposition of reservoir fill rate
 def plot_stl_decomposition(fill_rate, seasonal=13, trend=53, robust=True):
     series = fill_rate.dropna().astype(float).sort_index()
